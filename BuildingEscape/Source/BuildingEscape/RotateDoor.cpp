@@ -1,11 +1,12 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "RotateDoor.h"
-#include "Engine/Engine.h"
+#include "Runtime/Engine/Classes/GameFramework/Actor.h" 
+#include "EngineMinimal.h"
 
 
 // Sets default values for this component's properties
-URotateDoor::URotateDoor()
+URotateDoor::URotateDoor ()
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
@@ -19,12 +20,26 @@ URotateDoor::URotateDoor()
 void URotateDoor::BeginPlay()
 {
 	Super::BeginPlay();
-	AActor* Owner = GetOwner();
-	FRotator NewRotation = FRotator(0.0f, 90.0f, 0.0f);
-	Owner->SetActorRotation(NewRotation);
+
+	ActorThatOpensDoor = GetWorld()->GetFirstPlayerController()->GetPawn();
+	
 	
 	// ...
 	
+}
+
+void URotateDoor::OpenDoor()
+{
+	AActor* Owner = GetOwner();
+	FRotator NewRotation = FRotator(0.0f, openDoorAngle, 0.0f);
+	Owner->SetActorRotation(NewRotation);
+}
+
+void URotateDoor::CloseDoor()
+{
+	AActor* Owner = GetOwner();
+	FRotator NewRotation = FRotator(0.0f, 0.0f, 0.0f);
+	Owner->SetActorRotation(NewRotation);
 }
 
 
@@ -33,6 +48,16 @@ void URotateDoor::TickComponent(float DeltaTime, ELevelTick TickType, FActorComp
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
+	//Poll the trigger volume
+	//If the ActorThatOpensDoor is in the volume of the trigger
+	if (pressurePlate->IsOverlappingActor(ActorThatOpensDoor))
+	{
+	OpenDoor();
+	}
+	else
+	{
+		CloseDoor();
+	}
 	// ...
 }
 

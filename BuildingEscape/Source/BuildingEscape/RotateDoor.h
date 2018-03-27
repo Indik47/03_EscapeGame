@@ -2,9 +2,11 @@
 
 #pragma once
 
+#include "Engine/TriggerVolume.h"
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "RotateDoor.generated.h"
+
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -20,10 +22,19 @@ protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
+	void OpenDoor();
+	void CloseDoor();
+
 public:	
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
-		
+private:
+	UPROPERTY(EditAnywhere)
+	float openDoorAngle = 90.0f;
 	
+	UPROPERTY(EditAnywhere)
+	ATriggerVolume* pressurePlate;
+
+	UPROPERTY(EditAnywhere)
+		AActor* ActorThatOpensDoor;
 };
