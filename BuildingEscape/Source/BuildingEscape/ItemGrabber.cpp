@@ -6,6 +6,7 @@
 #include "Runtime/Engine/Public/DrawDebugHelpers.h"
 
 #define OUT
+
 // Sets default values for this component's properties
 UItemGrabber::UItemGrabber()
 {
@@ -30,21 +31,11 @@ void UItemGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCom
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	/// Get player view point this tick
-	FVector PlayerViewPointLocation;
-	FRotator PlayerViewPointRotation;
-	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(
-		OUT PlayerViewPointLocation,
-		OUT PlayerViewPointRotation
-	);
-
-	FVector LineTraceEnd = PlayerViewPointLocation + PlayerViewPointRotation.Vector() * Reach;
-
 	// if the physics handle is attached
 	if (PhysicsHandle->GrabbedComponent)
 	{
 		// move the object that we're holding
-		PhysicsHandle->SetTargetLocation(LineTraceEnd);
+		PhysicsHandle->SetTargetLocation(GetLineTrace().TraceEnd);
 	}
 }
 
@@ -83,10 +74,7 @@ void UItemGrabber::Release()
 void UItemGrabber::FindPhysicsHandleComponent()
 {
 	PhysicsHandle = GetOwner()->FindComponentByClass<UPhysicsHandleComponent>();
-	if (PhysicsHandle)
-	{
-	}
-	else
+	if (PhysicsHandle == nullptr)
 	{
 		UE_LOG(LogTemp, Error, TEXT("%s has no physics handle attached"), *GetOwner()->GetName())
 	}
@@ -107,18 +95,27 @@ void UItemGrabber::SetupInputComponent()
 	}
 }
 
-FHitResult UItemGrabber::GetFirstPhysicsBodyInReach() const
+TwoVectors UItemGrabber::GetLineTrace() const
 {
-	/// Get player view point this tick
+	TwoVectors TraceLine;
 	FVector PlayerViewPointLocation;
 	FRotator PlayerViewPointRotation;
 	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(
 		OUT PlayerViewPointLocation,
 		OUT PlayerViewPointRotation
 	);
+	//calculate Line Trace End by adding vector pointing where the player is looking to the player position vector 
+	FVector LineTraceEnd = PlayerViewPointLocation + PlayerViewPointRotation.Vector() * TraceReach;
 
-	FVector LineTraceEnd = PlayerViewPointLocation + PlayerViewPointRotation.Vector() * Reach;
+	TraceLine.Start = PlayerViewPointLocation;
+	TraceLine.End = LineTraceEnd;
 
+	return TraceLine;
+}
+
+FHitResult UItemGrabber::GetFirstPhysicsBodyInReach() const
+{
+	TwoVectors TraceLinePoints = GetLineTrace();
 	/// Setup query parameters
 	FCollisionQueryParams TraceParameters(FName(TEXT("")), false, GetOwner());
 
@@ -126,8 +123,8 @@ FHitResult UItemGrabber::GetFirstPhysicsBodyInReach() const
 	FHitResult Hit;
 	GetWorld()->LineTraceSingleByObjectType(
 		OUT Hit,
-		PlayerViewPointLocation,
-		LineTraceEnd,
+		TraceLinePoints.TraceStart,
+		TraceLinePoints.TraceEnd,
 		FCollisionObjectQueryParams(ECollisionChannel::ECC_PhysicsBody),
 		TraceParameters
 	);
@@ -141,4 +138,8 @@ FHitResult UItemGrabber::GetFirstPhysicsBodyInReach() const
 
 	return Hit;
 }
+
+
+
+
 

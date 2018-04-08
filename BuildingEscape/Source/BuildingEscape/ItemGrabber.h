@@ -8,6 +8,13 @@
 #include "Components/InputComponent.h"
 #include "ItemGrabber.generated.h"
 
+///my struct for two vectors. Just for learning. Should have used Unreal`s native FTwoVectors instead
+struct TwoVectors
+{
+	FVector Start;
+	FVector End;
+};
+
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class BUILDINGESCAPE_API UItemGrabber : public UActorComponent
@@ -28,8 +35,8 @@ public:
 
 private:
 	UPROPERTY(EditAnywhere)
-	float Reach = 100.f;
-
+	float TraceReach = 100.f;
+	
 	UPhysicsHandleComponent* PhysicsHandle = nullptr;
 	UInputComponent* InputComponent = nullptr;
 	
@@ -42,6 +49,9 @@ private:
 	// Setup attached Input Component
 	void SetupInputComponent();
 
+	//Get lineTrace start + end points (for ray-casting)
+	TwoVectors GetLineTrace() const;
+
+	//Ray-cast into the distance and return first Physical Body that was hit
 	FHitResult GetFirstPhysicsBodyInReach() const;
-	
 };
