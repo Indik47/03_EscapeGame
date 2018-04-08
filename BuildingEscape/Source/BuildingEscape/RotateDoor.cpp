@@ -22,8 +22,6 @@ void URotateDoor::BeginPlay()
 	Super::BeginPlay();
 	Owner = GetOwner();
 	ActorThatOpensDoor = GetWorld()->GetFirstPlayerController()->GetPawn();
-	
-	
 	// ...
 	
 }
