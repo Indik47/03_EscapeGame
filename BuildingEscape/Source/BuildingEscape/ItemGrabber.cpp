@@ -35,7 +35,7 @@ void UItemGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCom
 	if (PhysicsHandle->GrabbedComponent)
 	{
 		// move the object that we're holding
-		PhysicsHandle->SetTargetLocation(GetLineTrace().TraceEnd);
+		PhysicsHandle->SetTargetLocation(GetLineTrace().End);
 	}
 }
 
@@ -97,18 +97,18 @@ void UItemGrabber::SetupInputComponent()
 
 TwoVectors UItemGrabber::GetLineTrace() const
 {
-	TwoVectors TraceLine;
 	FVector PlayerViewPointLocation;
 	FRotator PlayerViewPointRotation;
+	//get Player ViewPoint position and rotation as OUT parameters
 	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(
 		OUT PlayerViewPointLocation,
 		OUT PlayerViewPointRotation
 	);
-	//calculate Line Trace End by adding vector pointing where the player is looking to the player position vector 
-	FVector LineTraceEnd = PlayerViewPointLocation + PlayerViewPointRotation.Vector() * TraceReach;
-
+	
+	TwoVectors TraceLine;
 	TraceLine.Start = PlayerViewPointLocation;
-	TraceLine.End = LineTraceEnd;
+	//calculate Line Trace End by adding player position with the vector pointing to where the player is looking
+	TraceLine.End = PlayerViewPointLocation + PlayerViewPointRotation.Vector() * TraceReach;;
 
 	return TraceLine;
 }
@@ -123,8 +123,8 @@ FHitResult UItemGrabber::GetFirstPhysicsBodyInReach() const
 	FHitResult Hit;
 	GetWorld()->LineTraceSingleByObjectType(
 		OUT Hit,
-		TraceLinePoints.TraceStart,
-		TraceLinePoints.TraceEnd,
+		TraceLinePoints.Start,
+		TraceLinePoints.End,
 		FCollisionObjectQueryParams(ECollisionChannel::ECC_PhysicsBody),
 		TraceParameters
 	);

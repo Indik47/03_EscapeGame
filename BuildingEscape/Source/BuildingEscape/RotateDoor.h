@@ -5,6 +5,7 @@
 #include "Engine/TriggerVolume.h"
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Components/InputComponent.h"
 #include "RotateDoor.generated.h"
 
 
@@ -17,6 +18,7 @@ class BUILDINGESCAPE_API URotateDoor : public UActorComponent
 public:	
 	// Sets default values for this component's properties
 	URotateDoor();
+	
 
 protected:
 	// Called when the game starts
@@ -36,12 +38,14 @@ private:
 	UPROPERTY(EditAnywhere)
 	ATriggerVolume* pressurePlate;
 
-	UPROPERTY(VisibleAnywhere)
-	AActor* ActorThatOpensDoor;
+	UInputComponent* InputComponent = nullptr;
 
 	UPROPERTY(EditAnywhere)
 	float doorCloseDelay = 0.5f;
 	float lastDoorOpenTime;
 
 	AActor* Owner;
+
+	float GetOverallWeightOnPressurePlate();
+	
 };

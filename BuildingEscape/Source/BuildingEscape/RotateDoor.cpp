@@ -3,10 +3,12 @@
 #include "RotateDoor.h"
 #include "Runtime/Engine/Classes/GameFramework/Actor.h" 
 #include "EngineMinimal.h"
+#include "Components/PrimitiveComponent.h"
 
+#define OUT
 
 // Sets default values for this component's properties
-URotateDoor::URotateDoor ()
+URotateDoor::URotateDoor()
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
@@ -21,9 +23,8 @@ void URotateDoor::BeginPlay()
 {
 	Super::BeginPlay();
 	Owner = GetOwner();
-	ActorThatOpensDoor = GetWorld()->GetFirstPlayerController()->GetPawn();
 	// ...
-	
+
 }
 
 void URotateDoor::OpenDoor()
@@ -41,13 +42,13 @@ void URotateDoor::CloseDoor()
 void URotateDoor::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	//GetOverallWeightOnPressurePlate();
 
 	//Poll the trigger volume
-	//If the ActorThatOpensDoor is in the volume of the trigger
-	if (pressurePlate->IsOverlappingActor(ActorThatOpensDoor))
+	if (GetOverallWeightOnPressurePlate() > 35.f)
 	{
-	OpenDoor();
-	lastDoorOpenTime = GetWorld()->GetTimeSeconds();
+		OpenDoor();
+		lastDoorOpenTime = GetWorld()->GetTimeSeconds();
 	}
 	if (TimeToCloseDoor(lastDoorOpenTime))
 	{
@@ -61,4 +62,22 @@ bool URotateDoor::TimeToCloseDoor(float lastDoorOpenTime)
 {
 	return GetWorld()->GetTimeSeconds() - lastDoorOpenTime > doorCloseDelay;
 }
+
+float URotateDoor::GetOverallWeightOnPressurePlate()
+{
+	float OverallWeight = 0.f;
+	//find all actors inside trigger Pressure Plate
+	TArray<AActor*> OverlappingActors;
+	pressurePlate->GetOverlappingActors(OUT OverlappingActors);
+
+	//iterate through them to find overall weight
+	for (auto* Actor : OverlappingActors)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s"), *Actor->GetName())
+		OverallWeight += Actor->FindComponentByClass<UPrimitiveComponent>()->CalculateMass();
+	}
+	return OverallWeight;
+}
+
+
 
