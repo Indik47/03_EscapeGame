@@ -32,10 +32,22 @@ void UItemGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCom
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	// if the physics handle is attached
+
+	if (!PhysicsHandle) { return; }
 	if (PhysicsHandle->GrabbedComponent)
 	{
 		// move the object that we're holding
 		PhysicsHandle->SetTargetLocation(GetLineTrace().End);
+	}
+}
+
+//check if PhysicsHandle is attached
+void UItemGrabber::FindPhysicsHandleComponent()
+{
+	PhysicsHandle = GetOwner()->FindComponentByClass<UPhysicsHandleComponent>();
+	if (PhysicsHandle == nullptr)
+	{
+		UE_LOG(LogTemp, Error, TEXT("%s has no physics handle attached"), *GetOwner()->GetName())
 	}
 }
 
@@ -65,19 +77,9 @@ void UItemGrabber::Grab()
 
 void UItemGrabber::Release()
 {
+	if (!PhysicsHandle) { return; }
 	UE_LOG(LogTemp, Warning, TEXT("Grab released"))
 		PhysicsHandle->ReleaseComponent();
-}
-
-
-//check if PhysicsHandle is attached
-void UItemGrabber::FindPhysicsHandleComponent()
-{
-	PhysicsHandle = GetOwner()->FindComponentByClass<UPhysicsHandleComponent>();
-	if (PhysicsHandle == nullptr)
-	{
-		UE_LOG(LogTemp, Error, TEXT("%s has no physics handle attached"), *GetOwner()->GetName())
-	}
 }
 
 void UItemGrabber::SetupInputComponent()

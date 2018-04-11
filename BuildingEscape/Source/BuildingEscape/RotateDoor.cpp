@@ -23,6 +23,12 @@ void URotateDoor::BeginPlay()
 {
 	Super::BeginPlay();
 	Owner = GetOwner();
+
+	//pressure plate not assigned (nullptr protection)
+	if (pressurePlate == nullptr)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Pressure Plate (opening trigger) not assigned to %s! (nullptr)"), *Owner->GetName())
+	}
 	// ...
 
 }
@@ -42,7 +48,8 @@ void URotateDoor::CloseDoor()
 void URotateDoor::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-	//GetOverallWeightOnPressurePlate();
+	
+	if (!pressurePlate)  {	return;	}		//nullptr protection
 
 	//Poll the trigger volume
 	if (GetOverallWeightOnPressurePlate() > 35.f)
@@ -67,6 +74,8 @@ float URotateDoor::GetOverallWeightOnPressurePlate()
 {
 	float OverallWeight = 0.f;
 	//find all actors inside trigger Pressure Plate
+
+
 	TArray<AActor*> OverlappingActors;
 	pressurePlate->GetOverlappingActors(OUT OverlappingActors);
 
