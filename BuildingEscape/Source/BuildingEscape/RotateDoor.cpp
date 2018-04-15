@@ -33,16 +33,6 @@ void URotateDoor::BeginPlay()
 
 }
 
-void URotateDoor::OpenDoor()
-{
-	Owner->SetActorRotation(FRotator(0.0f, openDoorAngle, 0.0f));
-}
-
-void URotateDoor::CloseDoor()
-{
-	Owner->SetActorRotation(FRotator(0.0f, 0.0f, 0.0f));
-}
-
 
 // Called every frame
 void URotateDoor::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -52,30 +42,23 @@ void URotateDoor::TickComponent(float DeltaTime, ELevelTick TickType, FActorComp
 	if (!pressurePlate)  {	return;	}		//nullptr protection
 
 	//Poll the trigger volume
-	if (GetOverallWeightOnPressurePlate() > 35.f)
+	if (GetOverallWeightOnPressurePlate() > TriggerMass)
 	{
-		OpenDoor();
-		lastDoorOpenTime = GetWorld()->GetTimeSeconds();
+		OnOpen.Broadcast();
 	}
-	if (TimeToCloseDoor(lastDoorOpenTime))
+	else
 	{
-		CloseDoor();
+		OnClose.Broadcast();
 	}
 	// ...
 }
 
-bool URotateDoor::TimeToCloseDoor(float lastDoorOpenTime)
-
-{
-	return GetWorld()->GetTimeSeconds() - lastDoorOpenTime > doorCloseDelay;
-}
 
 float URotateDoor::GetOverallWeightOnPressurePlate()
 {
 	float OverallWeight = 0.f;
+	
 	//find all actors inside trigger Pressure Plate
-
-
 	TArray<AActor*> OverlappingActors;
 	pressurePlate->GetOverlappingActors(OUT OverlappingActors);
 

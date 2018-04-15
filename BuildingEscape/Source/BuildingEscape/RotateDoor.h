@@ -8,7 +8,7 @@
 #include "Components/InputComponent.h"
 #include "RotateDoor.generated.h"
 
-
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FDoorEvent);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class BUILDINGESCAPE_API URotateDoor : public UActorComponent
@@ -19,12 +19,17 @@ public:
 	// Sets default values for this component's properties
 	URotateDoor();
 	
+	UPROPERTY(BlueprintAssignable)
+	FDoorEvent OnOpen;
+
+	UPROPERTY(BlueprintAssignable)
+	FDoorEvent OnClose;
 
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
-	void OpenDoor();
+	
 	void CloseDoor();
 
 public:	
@@ -34,10 +39,7 @@ public:
 
 private:
 	UPROPERTY(EditAnywhere)
-	float openDoorAngle = 90.0f;
-	
-	UPROPERTY(EditAnywhere)
-	float doorCloseDelay = 0.5f;
+	float TriggerMass = 35.0f;
 	
 	UPROPERTY(EditAnywhere)
 	ATriggerVolume* pressurePlate = nullptr;
